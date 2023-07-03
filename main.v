@@ -12,15 +12,18 @@ fn main() {
 
 	psw := 'this is a custom static keyword'
 	guid := sha256.hexhash(get_guid())
-	if os.args.len >= 2 {
-		hash := os.args[1]
+	hash := os.input("Enter your key: ")
+	if hash != "" {
 		if guid != '' {
-			println(sha256.hexhash('${psw}|${guid}'))
 			if hash == sha256.hexhash('${psw}|${guid}') {
 				println('Extracting file...')
+				if !os.exists('extract') {
+					os.mkdir('extract') or { panic(err) }
+				}
 				os.write_file(os.join_path('extract', file_name), embedded_file.to_string())!
-				println('Starting...')
+				println('Done!')
 				if auto_start {
+					println('Starting...')
 					start(os.abs_path(os.join_path('extract', file_name)))
 				}
 				if auto_del {
@@ -53,7 +56,7 @@ fn start(path string) {
 fn get_guid() string {
 	mut command := ''
 	if pref.get_host_os() == pref.OS.windows {
-		command = 'wmic bios get serialnumber'
+		command = 'wmic csproduct get uuid'
 	} else if pref.get_host_os() == pref.OS.macos {
 		command = 'ioreg -l | grep IOPlatformSerialNumber'
 	} else if pref.get_host_os() == pref.OS.linux {
